@@ -1,0 +1,65 @@
+---
+- hosts: correo
+  remote_user: admin
+  become: yes
+  vars:
+    packages:
+    - http
+    - php
+    - postfix
+    - dovecot
+
+  tasks:
+  - name: Epel repo is installed
+    yum:
+      name: epel-release
+      state: present 
+  - name: Install packages
+    yum:
+      name: "{{ packages}}"
+      state: latest
+  - name: write postfix config file
+    template:
+      src: ./postfix-main.j2
+      dest: /etc/postfix/main.cf
+    notify:
+    - restart postfix
+  - name: ensure postfix is running
+    service:
+      name: postfix
+      state: started
+      enabled: yes
+  - name: enable imap in dovecot
+    lineinfile:
+      path: /etc/dovecot/dovecot.conf
+      line: 'protocols= imap pop3 lmtp'
+  - name: write dovecot config
+    copy: 
+      src: ./10-mail.conf
+      dest: /etc/dovecot/conf.d/10-mail.conf
+    notify: 
+    - restart dovecot
+  - name: ensure dovecot is running
+    service:
+      name: dovecot
+      state: started
+      enabled: yes
+  - name: open firewall ports 
+    firewalld:
+      service: "{{item}}"
+      state: enable
+      permanent: yes
+      immediate: yes
+    loop:
+    - smtp
+    - imap
+    - http
+  handlers:
+    - name: restart postfix
+      service:
+        name: postfix
+        state: restarted
+    - name: restart dovecot
+      service:
+        name: dovecot
+        state: restarted
