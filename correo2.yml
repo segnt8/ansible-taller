@@ -2,12 +2,10 @@
 - hosts: correo
   remote_user: admin
   become: yes
-  vars:
-    packages:
-    - http
-    - php
-    - postfix
-    - dovecot
+  
+  - name: Include variables for tasks and templates
+    include_vars: 
+      file: variables.yml
 
   tasks:
   - name: Epel repo is installed
