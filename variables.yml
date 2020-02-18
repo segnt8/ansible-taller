@@ -1,6 +1,6 @@
 ---
 packages:
-- http
+- httpd
 - php
 - postfix
 - dovecot
