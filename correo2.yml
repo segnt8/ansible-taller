@@ -2,12 +2,14 @@
 - hosts: correo
   remote_user: admin
   become: yes
-  
-  - name: Include variables for tasks and templates
-    include_vars: 
-      file: variables.yml
+  vars_files:
+  - "./variables.yml"
 
   tasks:
+#Puedo incluir variables usando el módulo include_vars
+#  - name: Include variables for tasks and templates
+#    include_vars:
+#      file: variables.yml
   - name: Epel repo is installed
     yum:
       name: epel-release
